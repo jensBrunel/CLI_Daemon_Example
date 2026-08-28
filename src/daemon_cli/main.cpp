@@ -1,3 +1,12 @@
+/**
+ * @file main.cpp
+ * @brief Simple CLI client for Daemon_Socket using Unix domain sockets.
+ *
+ * This executable connects to a Unix-domain socket (default: /var/run/Daemon_Socket)
+ * and sends/receives newline-terminated messages. It supports one-shot sends via
+ * `--send` and an interactive REPL mode.
+ */
+
 #include <arpa/inet.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -13,11 +22,27 @@
 #include <stdexcept>
 #include <string>
 
+/**
+ * @brief RAII wrapper for a Unix-domain socket connection to the daemon.
+ */
 class DaemonSocket {
 public:
+    /**
+     * @brief Construct a new DaemonSocket object
+     * @param path Filesystem path to the Unix-domain socket.
+     */
     explicit DaemonSocket(std::string path) : sockfd_(-1), path_(std::move(path)) {}
+
+    /**
+     * @brief Destroy the DaemonSocket object, closing the socket if open.
+     */
     ~DaemonSocket() { close_socket(); }
 
+    /**
+     * @brief Connect to the Unix-domain socket.
+     * @param err Output parameter populated on failure with a human-readable message.
+     * @return true if connection succeeded, false otherwise.
+     */
     bool connect_socket(std::string &err) {
         sockfd_ = socket(AF_UNIX, SOCK_STREAM, 0);
         if (sockfd_ == -1) {
@@ -45,6 +70,12 @@ public:
         return true;
     }
 
+    /**
+     * @brief Send a newline-terminated message to the daemon.
+     * @param msg Message to send (a trailing newline will be added if missing).
+     * @param err Output parameter populated on failure.
+     * @return true on success, false on error.
+     */
     bool send_message(const std::string &msg, std::string &err) {
         if (sockfd_ == -1) {
             err = "not connected";
@@ -61,6 +92,12 @@ public:
         return true;
     }
 
+    /**
+     * @brief Receive a response from the daemon up to a newline (or socket close).
+     * @param err Output parameter populated on failure.
+     * @return optional string with the received response (without trailing newline), or
+     *         std::nullopt on error.
+     */
     std::optional<std::string> receive_response(std::string &err) {
         if (sockfd_ == -1) {
             err = "not connected";
@@ -88,6 +125,9 @@ private:
     int sockfd_;
     std::string path_;
 
+    /**
+     * @brief Close the underlying socket if open.
+     */
     void close_socket() {
         if (sockfd_ != -1) {
             ::close(sockfd_);
@@ -95,6 +135,12 @@ private:
         }
     }
 
+    /**
+     * @brief Write the entire buffer to the socket, handling partial writes.
+     * @param data Pointer to data buffer.
+     * @param len Length of buffer in bytes.
+     * @return number of bytes written on success, -1 on error.
+     */
     ssize_t write_all(const char *data, size_t len) {
         size_t total = 0;
         while (total < len) {
@@ -106,11 +152,23 @@ private:
     }
 };
 
+/**
+ * @brief Print usage information for the CLI.
+ * @param prog Program name (argv[0]).
+ */
 static void print_usage(const char *prog) {
     std::cerr << "Usage: " << prog << " [--socket PATH] [--send MESSAGE]\n";
     std::cerr << "If --send is omitted, enters interactive mode where each line is sent.\n";
 }
 
+/**
+ * @brief Program entry point.
+ *
+ * Supported command-line options:
+ * - `--socket PATH` : path to the daemon unix-domain socket (default `/var/run/Daemon_Socket`)
+ * - `--send MESSAGE`: send a single MESSAGE and exit (one-shot mode)
+ * - `-h`, `--help`   : print this help message
+ */
 int main(int argc, char **argv) {
     std::string socket_path = "/var/run/Daemon_Socket"; // default path
     std::optional<std::string> one_shot_msg;
