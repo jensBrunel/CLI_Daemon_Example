@@ -67,4 +67,3 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
-src/daemon_cli/daemon_cli
