@@ -67,3 +67,24 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+bin/archivertest
+bin/capitalize
+bin/condense
+bin/filterkey
+bin/filterkeydom
+bin/jsonx
+bin/lookaheadparser
+bin/messagereader
+bin/parsebyparts
+bin/pretty
+bin/prettyauto
+bin/schemavalidator
+bin/serialize
+bin/simpledom
+bin/simplepullreader
+bin/simplereader
+bin/simplewriter
+bin/sortkeys
+bin/tutorial
+src/daemon_cli/daemon_cli
+src/daemon_cli/daemon_cli

@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include <rapidjson/document.h>
 
     /**
      * @brief Destroy the DaemonSocket object, closing the socket if open.

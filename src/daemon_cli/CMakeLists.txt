@@ -13,3 +13,6 @@ add_executable(daemon_cli
 if(UNIX)
   target_compile_definitions(daemon_cli PRIVATE PLATFORM_UNIX)
 endif()
+
+# Link RapidJSON headers (header-only INTERFACE target provided by RapidJSON)
+target_link_libraries(daemon_cli PRIVATE RapidJSON)
