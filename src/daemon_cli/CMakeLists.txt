@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(daemon_cli
   main.cpp
+  CommandParser.cpp
+  CommandParser.h
   DaemonSocket.cpp
   DaemonSocket.h
 )

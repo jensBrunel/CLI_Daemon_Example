@@ -10,10 +10,10 @@
 #include <iostream>
 #include <optional>
 #include <string>
+#include <vector>
 
+#include "CommandParser.h"
 #include "DaemonSocket.h"
-
-
 
 /**
  * @brief Print usage information for the CLI.
@@ -77,8 +77,18 @@ int main(int argc, char **argv) {
     while (true) {
         std::cout << "> ";
         if (!std::getline(std::cin, line)) break;
-        if (line == "quit" || line == "exit") break;
-        if (!client.send_message(line, err)) {
+
+        CommandParser command_parser(line);
+        const std::vector<std::string> tokens = command_parser.parse();
+
+        if (tokens.empty()) {
+            continue;
+        }
+
+        const std::string command = tokens.front();
+        if (command == "quit" || command == "exit") break;
+
+        if (!client.send_message(command_parser.raw(), err)) {
             std::cerr << "Send failed: " << err << "\n";
             continue;
         }
