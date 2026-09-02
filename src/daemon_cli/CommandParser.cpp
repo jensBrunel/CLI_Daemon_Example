@@ -1,21 +1,22 @@
 #include "CommandParser.h"
 
 #include <sstream>
+#include <utility>
 
-CommandParser::CommandParser(std::string input) : input_(std::move(input)) {}
+CommandParser::CommandParser(std::string strInput) : m_strInput(std::move(strInput)) {}
 
 std::vector<std::string> CommandParser::parse() const {
-    std::istringstream stream(input_);
-    std::vector<std::string> tokens;
-    std::string token;
+    std::istringstream stream(m_strInput);
+    std::vector<std::string> vecTokens;
+    std::string strToken;
 
-    while (stream >> token) {
-        tokens.push_back(token);
+    while (stream >> strToken) {
+        vecTokens.push_back(strToken);
     }
 
-    return tokens;
+    return vecTokens;
 }
 
 std::string CommandParser::raw() const {
-    return input_;
+    return m_strInput;
 }

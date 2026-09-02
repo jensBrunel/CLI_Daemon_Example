@@ -16,10 +16,10 @@
 
 /**
  * @brief Print usage information for the CLI.
- * @param prog Program name (argv[0]).
+ * @param pszProg Program name (argv[0]).
  */
-static void print_usage(const char *prog) {
-    std::cerr << "Usage: " << prog << " [--socket PATH]\n";
+static void print_usage(const char *pszProg) {
+    std::cerr << "Usage: " << pszProg << " [--socket PATH]\n";
     std::cerr << "Starts interactive command mode. Type 'quit' or 'exit' to leave.\n";
 }
 
@@ -30,55 +30,55 @@ static void print_usage(const char *prog) {
  * - `--socket PATH` : path to the daemon unix-domain socket (default `/var/run/Daemon_Socket`)
  * - `-h`, `--help`   : print this help message
  */
-int main(int argc, char **argv) {
-    std::string socket_path = "/var/run/Daemon_Socket"; // default path
+int main(int iArgc, char **ppszArgv) {
+    std::string strSocketPath = "/var/run/Daemon_Socket"; // default path
 
-    for (int i = 1; i < argc; ++i) {
-        std::string a = argv[i];
-        if (a == "--socket" && i + 1 < argc) {
-            socket_path = argv[++i];
-        } else if (a == "-h" || a == "--help") {
-            print_usage(argv[0]);
+    for (int iIndex = 1; iIndex < iArgc; ++iIndex) {
+        std::string strArg = ppszArgv[iIndex];
+        if (strArg == "--socket" && iIndex + 1 < iArgc) {
+            strSocketPath = ppszArgv[++iIndex];
+        } else if (strArg == "-h" || strArg == "--help") {
+            print_usage(ppszArgv[0]);
             return 0;
         } else {
-            print_usage(argv[0]);
+            print_usage(ppszArgv[0]);
             return 1;
         }
     }
 
-    DaemonSocket client(socket_path);
-    std::string err;
-    if (!client.connect_socket(err)) {
-        std::cerr << "Failed to connect to " << socket_path << ": " << err << "\n";
+    DaemonSocket client(strSocketPath);
+    std::string strErr;
+    if (!client.connect_socket(strErr)) {
+        std::cerr << "Failed to connect to " << strSocketPath << ": " << strErr << "\n";
         return 2;
     }
 
     // interactive mode
-    std::string line;
+    std::string strLine;
     while (true) {
         std::cout << "> ";
-        if (!std::getline(std::cin, line)) break;
+        if (!std::getline(std::cin, strLine)) break;
 
-        CommandParser command_parser(line);
-        const std::vector<std::string> tokens = command_parser.parse();
+        CommandParser commandParser(strLine);
+        const std::vector<std::string> vecTokens = commandParser.parse();
 
-        if (tokens.empty()) {
+        if (vecTokens.empty()) {
             continue;
         }
 
-        const std::string command = tokens.front();
-        if (command == "quit" || command == "exit") break;
+        const std::string strCommand = vecTokens.front();
+        if (strCommand == "quit" || strCommand == "exit") break;
 
-        if (!client.send_message(command_parser.raw(), err)) {
-            std::cerr << "Send failed: " << err << "\n";
+        if (!client.send_message(commandParser.raw(), strErr)) {
+            std::cerr << "Send failed: " << strErr << "\n";
             continue;
         }
-        auto resp = client.receive_response(err);
-        if (!resp) {
-            std::cerr << "Receive failed: " << err << "\n";
+        auto optStrResp = client.receive_response(strErr);
+        if (!optStrResp) {
+            std::cerr << "Receive failed: " << strErr << "\n";
             continue;
         }
-        std::cout << *resp << std::endl;
+        std::cout << *optStrResp << std::endl;
     }
 
     return 0;

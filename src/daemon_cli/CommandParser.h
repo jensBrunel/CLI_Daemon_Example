@@ -5,11 +5,11 @@
 
 class CommandParser {
 public:
-    explicit CommandParser(std::string input);
+    explicit CommandParser(std::string strInput);
 
     std::vector<std::string> parse() const;
     std::string raw() const;
 
 private:
-    std::string input_;
+    std::string m_strInput;
 };
