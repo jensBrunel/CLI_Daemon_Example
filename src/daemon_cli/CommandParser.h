@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include "vtss_ocelot_reg.h"
 
 class CommandParser {
 public:

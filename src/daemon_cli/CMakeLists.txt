@@ -12,6 +12,11 @@ add_executable(daemon_cli
   DaemonSocket.h
 )
 
+target_include_directories(daemon_cli PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/Ocelot
+  ${CMAKE_CURRENT_SOURCE_DIR}/../third_party
+)
+
 if(UNIX)
   target_compile_definitions(daemon_cli PRIVATE PLATFORM_UNIX)
 endif()
