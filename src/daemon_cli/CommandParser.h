@@ -1,4 +1,5 @@
-#pragma once
+#ifndef COMMANDPARSER_H
+#define COMMANDPARSER_H
 
 #include <string>
 #include <vector>
@@ -14,3 +15,5 @@ public:
 private:
     std::string m_strInput;
 };
+
+#endif // COMMANDPARSER_H

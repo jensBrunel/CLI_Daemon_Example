@@ -1,3 +1,6 @@
+#ifndef DAEMONSOCKET_H
+#define DAEMONSOCKET_H
+
 #include <cstddef>
 #include <optional>
 #include <string>
@@ -60,3 +63,5 @@ private:
      */
     ssize_t write_all(const char *pcData, size_t szLen);
 };
+
+#endif // DAEMONSOCKET_H
