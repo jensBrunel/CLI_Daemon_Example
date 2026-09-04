@@ -15,15 +15,6 @@
 #include "DaemonSocket.h"
 
 /**
- * @brief Print usage information for the CLI.
- * @param pszProg Program name (argv[0]).
- */
-static void print_usage(const char *pszProg) {
-    std::cerr << "Usage: " << pszProg << " [--socket PATH]\n";
-    std::cerr << "Starts interactive command mode. Type 'quit' or 'exit' to leave.\n";
-}
-
-/**
  * @brief Program entry point.
  *
  * Supported command-line options:
@@ -31,24 +22,15 @@ static void print_usage(const char *pszProg) {
  * - `-h`, `--help`   : print this help message
  */
 int main(int iArgc, char **ppszArgv) {
-    std::string strSocketPath = "/var/run/Daemon_Socket"; // default path
-
-    for (int iIndex = 1; iIndex < iArgc; ++iIndex) {
-        std::string strArg = ppszArgv[iIndex];
-        if (strArg == "--socket" && iIndex + 1 < iArgc) {
-            strSocketPath = ppszArgv[++iIndex];
-        } else if (strArg == "-h" || strArg == "--help") {
-            print_usage(ppszArgv[0]);
-            return 0;
-        } else {
-            print_usage(ppszArgv[0]);
-            return 1;
-        }
+    std::string strSocketPath;
+    const int iParseStatus = CommandParser::ParseArgs(iArgc, ppszArgv, strSocketPath);
+    if (iParseStatus == 0 || iParseStatus == 1) {
+        return iParseStatus;
     }
 
     std::string strErr;
     CommandParser commandParser(strSocketPath);
-    if (!commandParser.connect(strErr)) {
+    if (!commandParser.Connect(strErr)) {
         std::cerr << "Failed to connect to " << strSocketPath << ": " << strErr << "\n";
         return 2;
     }
@@ -59,22 +41,10 @@ int main(int iArgc, char **ppszArgv) {
         std::cout << "> ";
         if (!std::getline(std::cin, strLine)) break;
 
-        commandParser.set_input(strLine);
-        const std::vector<std::string> vecTokens = commandParser.parse();
-
-        if (vecTokens.empty()) {
-            continue;
+        commandParser.SetInput(strLine);
+        if (!commandParser.HandleInput(strErr, std::cout)) {
+            break;
         }
-
-        const std::string strCommand = vecTokens.front();
-        if (strCommand == "quit" || strCommand == "exit") break;
-
-        auto optStrResp = commandParser.execute(strErr);
-        if (!optStrResp) {
-            std::cerr << "Command execution failed: " << strErr << "\n";
-            continue;
-        }
-        std::cout << *optStrResp << std::endl;
     }
 
     return 0;
