@@ -46,9 +46,9 @@ int main(int iArgc, char **ppszArgv) {
         }
     }
 
-    DaemonSocket client(strSocketPath);
     std::string strErr;
-    if (!client.connect_socket(strErr)) {
+    CommandParser commandParser(strSocketPath);
+    if (!commandParser.connect(strErr)) {
         std::cerr << "Failed to connect to " << strSocketPath << ": " << strErr << "\n";
         return 2;
     }
@@ -59,7 +59,7 @@ int main(int iArgc, char **ppszArgv) {
         std::cout << "> ";
         if (!std::getline(std::cin, strLine)) break;
 
-        CommandParser commandParser(strLine);
+        commandParser.set_input(strLine);
         const std::vector<std::string> vecTokens = commandParser.parse();
 
         if (vecTokens.empty()) {
@@ -69,13 +69,9 @@ int main(int iArgc, char **ppszArgv) {
         const std::string strCommand = vecTokens.front();
         if (strCommand == "quit" || strCommand == "exit") break;
 
-        if (!client.send_message(commandParser.raw(), strErr)) {
-            std::cerr << "Send failed: " << strErr << "\n";
-            continue;
-        }
-        auto optStrResp = client.receive_response(strErr);
+        auto optStrResp = commandParser.execute(strErr);
         if (!optStrResp) {
-            std::cerr << "Receive failed: " << strErr << "\n";
+            std::cerr << "Command execution failed: " << strErr << "\n";
             continue;
         }
         std::cout << *optStrResp << std::endl;
