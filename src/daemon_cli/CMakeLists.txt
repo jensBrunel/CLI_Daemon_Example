@@ -10,6 +10,8 @@ add_executable(daemon_cli
   CommandParser.h
   DaemonSocket.cpp
   DaemonSocket.h
+  IniConfig.cpp
+  IniConfig.h
 )
 
 target_include_directories(daemon_cli PRIVATE

@@ -9,13 +9,16 @@ void CommandParser::PrintUsage(const char *pszProg) {
     std::cerr << "Starts interactive command mode. Type 'quit' or 'exit' to leave.\n";
 }
 
-int CommandParser::ParseArgs(int iArgc, char **ppszArgv, std::string &strSocketPath) {
+int CommandParser::ParseArgs(int iArgc, char **ppszArgv, std::string &strSocketPath, std::string &strIniPath) {
     strSocketPath = "/var/run/Daemon_Socket";
+    strIniPath.clear();
 
     for (int iIndex = 1; iIndex < iArgc; ++iIndex) {
         std::string strArg = ppszArgv[iIndex];
         if (strArg == "--socket" && iIndex + 1 < iArgc) {
             strSocketPath = ppszArgv[++iIndex];
+        } else if (strArg == "--inifile" && iIndex + 1 < iArgc) {
+            strIniPath = ppszArgv[++iIndex];
         } else if (strArg == "-h" || strArg == "--help") {
             PrintUsage(ppszArgv[0]);
             return 0;
@@ -28,8 +31,48 @@ int CommandParser::ParseArgs(int iArgc, char **ppszArgv, std::string &strSocketP
     return -1;
 }
 
+std::string CommandParser::LoadSocketPathFromIni(const std::string &strIniPath) {
+    if (strIniPath.empty()) {
+        return std::string();
+    }
+
+    IniConfig iniConfig(strIniPath);
+    return iniConfig.get("SOCKET_PATH");
+}
+
+std::string CommandParser::ResolveSocketPath(const std::string &strSocketPath, const std::string &strIniPath) {
+    const std::string strIniSocketPath = LoadSocketPathFromIni(strIniPath);
+    return strIniSocketPath.empty() ? strSocketPath : strIniSocketPath;
+}
+
+CommandParser::CommandParser(int iArgc, char **ppszArgv)
+    : m_strInput(), m_strSocketPath(), m_socket(""), m_bValid(true), m_iExitCode(-1) {
+    std::string strSocketPath;
+    std::string strIniPath;
+    m_iExitCode = ParseArgs(iArgc, ppszArgv, strSocketPath, strIniPath);
+    if (m_iExitCode == 0 || m_iExitCode == 1) {
+        m_bValid = false;
+        return;
+    }
+
+    m_strSocketPath = ResolveSocketPath(strSocketPath, strIniPath);
+    m_socket = DaemonSocket(m_strSocketPath);
+}
+
 CommandParser::CommandParser(std::string strSocketPath)
-    : m_strInput(), m_socket(std::move(strSocketPath)) {}
+    : m_strInput(), m_strSocketPath(std::move(strSocketPath)), m_socket(m_strSocketPath), m_bValid(true), m_iExitCode(-1) {}
+
+bool CommandParser::IsValid() const {
+    return m_bValid;
+}
+
+int CommandParser::ExitCode() const {
+    return m_iExitCode;
+}
+
+const std::string &CommandParser::SocketPath() const {
+    return m_strSocketPath;
+}
 
 void CommandParser::SetInput(std::string strInput) {
     m_strInput = std::move(strInput);

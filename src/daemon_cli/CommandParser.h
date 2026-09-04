@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "DaemonSocket.h"
+#include "IniConfig.h"
 
 class CommandParser {
 public:
@@ -21,15 +22,56 @@ public:
      * @param iArgc Number of arguments.
      * @param ppszArgv Argument vector.
      * @param strSocketPath Output socket path.
+     * @param strIniPath Output INI file path.
      * @return 0 for help, 1 for invalid arguments, and -1 when parsing succeeded.
      */
-    static int ParseArgs(int iArgc, char **ppszArgv, std::string &strSocketPath);
+    static int ParseArgs(int iArgc, char **ppszArgv, std::string &strSocketPath, std::string &strIniPath);
+
+    /**
+     * @brief Resolve the daemon socket path from an optional INI file.
+     * @param strSocketPath Current socket path.
+     * @param strIniPath INI file path, or empty to skip config lookup.
+     * @return Final socket path after applying the INI override.
+     */
+    static std::string ResolveSocketPath(const std::string &strSocketPath, const std::string &strIniPath);
+
+    /**
+     * @brief Load the socket path from an INI file using IniConfig.
+     * @param strIniPath Path to the INI file.
+     * @return The socket path from SOCKET_PATH if present, otherwise the default path.
+     */
+    static std::string LoadSocketPathFromIni(const std::string &strIniPath);
+
+    /**
+     * @brief Construct a parser from raw CLI arguments and resolve the final socket path.
+     * @param iArgc Number of arguments.
+     * @param ppszArgv Argument vector.
+     */
+    explicit CommandParser(int iArgc, char **ppszArgv);
 
     /**
      * @brief Construct a parser bound to a daemon socket path.
      * @param strSocketPath Unix domain socket path used to talk to the daemon.
      */
     explicit CommandParser(std::string strSocketPath);
+
+    /**
+     * @brief Query whether the parser was initialized successfully.
+     * @return true when the arguments are valid, false for help or invalid usage.
+     */
+    bool IsValid() const;
+
+    /**
+     * @brief Get the exit code for the current argument parse state.
+     * @return 0 for help, 1 for invalid arguments, and -1 for normal operation.
+     */
+    int ExitCode() const;
+
+    /**
+     * @brief Get the resolved socket path currently in use.
+     * @return Socket path string.
+     */
+    const std::string &SocketPath() const;
 
     /**
      * @brief Set the raw command text to be parsed and executed.
@@ -73,7 +115,10 @@ public:
 
 private:
     std::string m_strInput;
+    std::string m_strSocketPath;
     DaemonSocket m_socket;
+    bool m_bValid;
+    int m_iExitCode;
 };
 
 #endif // COMMANDPARSER_H

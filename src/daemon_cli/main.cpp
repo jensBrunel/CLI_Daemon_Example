@@ -22,16 +22,14 @@
  * - `-h`, `--help`   : print this help message
  */
 int main(int iArgc, char **ppszArgv) {
-    std::string strSocketPath;
-    const int iParseStatus = CommandParser::ParseArgs(iArgc, ppszArgv, strSocketPath);
-    if (iParseStatus == 0 || iParseStatus == 1) {
-        return iParseStatus;
+    CommandParser commandParser(iArgc, ppszArgv);
+    if (!commandParser.IsValid()) {
+        return commandParser.ExitCode();
     }
 
     std::string strErr;
-    CommandParser commandParser(strSocketPath);
     if (!commandParser.Connect(strErr)) {
-        std::cerr << "Failed to connect to " << strSocketPath << ": " << strErr << "\n";
+        std::cerr << "Failed to connect to " << commandParser.SocketPath() << ": " << strErr << "\n";
         return 2;
     }
 
