@@ -8,6 +8,7 @@
 
 #include "DaemonSocket.h"
 #include "IniConfig.h"
+#include "ConfigParser.h"
 
 class CommandParser {
 public:
@@ -18,29 +19,33 @@ public:
     static void PrintUsage(const char *pszProg);
 
     /**
-     * @brief Parse command-line arguments and select the daemon socket path.
+     * @brief Parse command-line arguments. The socket path (if provided)
+     *        is stored in the member `m_strSocketPath`.
      * @param iArgc Number of arguments.
      * @param ppszArgv Argument vector.
-     * @param strSocketPath Output socket path.
      * @param strIniPath Output INI file path.
      * @return 0 for help, 1 for invalid arguments, and -1 when parsing succeeded.
      */
-    static int ParseArgs(int iArgc, char **ppszArgv, std::string &strSocketPath, std::string &strIniPath);
+    int ParseArgs(int iArgc, char **ppszArgv);
 
     /**
      * @brief Resolve the daemon socket path from an optional INI file.
-     * @param strSocketPath Current socket path.
+     *        Uses the current `m_strSocketPath` as the default value.
      * @param strIniPath INI file path, or empty to skip config lookup.
      * @return Final socket path after applying the INI override.
      */
-    static std::string ResolveSocketPath(const std::string &strSocketPath, const std::string &strIniPath);
+    /**
+     * @brief Resolve the daemon socket path from an optional INI file.
+     *        Uses the current `m_strSocketPath` and `m_strIniPath` members.
+     * @return Final socket path after applying the INI override.
+     */
+    std::string ResolveSocketPath();
 
     /**
-     * @brief Load the socket path from an INI file using IniConfig.
-     * @param strIniPath Path to the INI file.
-     * @return The socket path from SOCKET_PATH if present, otherwise the default path.
+     * @brief Load the socket path from the configured INI file using IniConfig.
+     * @return The socket path from SOCKET_PATH if present, otherwise an empty string.
      */
-    static std::string LoadSocketPathFromIni(const std::string &strIniPath);
+    std::string LoadSocketPathFromIni() const;
 
     /**
      * @brief Construct a parser from raw CLI arguments and resolve the final socket path.
@@ -116,6 +121,9 @@ public:
 private:
     std::string m_strInput;
     std::string m_strSocketPath;
+    std::string m_strIniPath;
+    std::string m_configJson;
+    ConfigParser m_configParser;
     DaemonSocket m_socket;
     bool m_bValid;
     int m_iExitCode;

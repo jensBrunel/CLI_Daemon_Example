@@ -9,16 +9,19 @@ void CommandParser::PrintUsage(const char *pszProg) {
     std::cerr << "Starts interactive command mode. Type 'quit' or 'exit' to leave.\n";
 }
 
-int CommandParser::ParseArgs(int iArgc, char **ppszArgv, std::string &strSocketPath, std::string &strIniPath) {
-    strSocketPath = "/var/run/Daemon_Socket";
-    strIniPath.clear();
+int CommandParser::ParseArgs(int iArgc, char **ppszArgv) {
+    m_strSocketPath = "/var/run/Daemon_Socket";
+    m_strIniPath.clear();
 
     for (int iIndex = 1; iIndex < iArgc; ++iIndex) {
         std::string strArg = ppszArgv[iIndex];
         if (strArg == "--socket" && iIndex + 1 < iArgc) {
-            strSocketPath = ppszArgv[++iIndex];
+            m_strSocketPath = ppszArgv[++iIndex];
         } else if (strArg == "--inifile" && iIndex + 1 < iArgc) {
-            strIniPath = ppszArgv[++iIndex];
+            m_strIniPath = ppszArgv[++iIndex];
+        } else if (strArg == "--configfile" && iIndex + 1 < iArgc) {
+            m_configJson = ppszArgv[++iIndex];
+            std::cout<< "Config file path: " << m_configJson << std::endl;
         } else if (strArg == "-h" || strArg == "--help") {
             PrintUsage(ppszArgv[0]);
             return 0;
@@ -31,31 +34,40 @@ int CommandParser::ParseArgs(int iArgc, char **ppszArgv, std::string &strSocketP
     return -1;
 }
 
-std::string CommandParser::LoadSocketPathFromIni(const std::string &strIniPath) {
-    if (strIniPath.empty()) {
+std::string CommandParser::LoadSocketPathFromIni() const {
+    if (m_strIniPath.empty()) {
         return std::string();
     }
 
-    IniConfig iniConfig(strIniPath);
+    IniConfig iniConfig(m_strIniPath);
     return iniConfig.get("SOCKET_PATH");
 }
 
-std::string CommandParser::ResolveSocketPath(const std::string &strSocketPath, const std::string &strIniPath) {
-    const std::string strIniSocketPath = LoadSocketPathFromIni(strIniPath);
-    return strIniSocketPath.empty() ? strSocketPath : strIniSocketPath;
+std::string CommandParser::ResolveSocketPath() {
+    const std::string strIniSocketPath = LoadSocketPathFromIni();
+    return strIniSocketPath.empty() ? m_strSocketPath : strIniSocketPath;
 }
 
 CommandParser::CommandParser(int iArgc, char **ppszArgv)
     : m_strInput(), m_strSocketPath(), m_socket(""), m_bValid(true), m_iExitCode(-1) {
-    std::string strSocketPath;
-    std::string strIniPath;
-    m_iExitCode = ParseArgs(iArgc, ppszArgv, strSocketPath, strIniPath);
+    m_iExitCode = ParseArgs(iArgc, ppszArgv);
     if (m_iExitCode == 0 || m_iExitCode == 1) {
         m_bValid = false;
         return;
     }
+    // If a JSON config file path was provided, try to open it and allow it
+    // to override the socket path via the key "SOCKET_PATH".
+    if (!m_configJson.empty()) {
+        if (m_configParser.Open(m_configJson)) {
+            if (m_configParser.HasKey("SOCKET_PATH")) {
+                m_strSocketPath = m_configParser.GetValue("SOCKET_PATH");
+            }
+        } else {
+            std::cerr << "Warning: failed to open config file: " << m_configJson << std::endl;
+        }
+    }
 
-    m_strSocketPath = ResolveSocketPath(strSocketPath, strIniPath);
+    m_strSocketPath = ResolveSocketPath();
     m_socket = DaemonSocket(m_strSocketPath);
 }
 
