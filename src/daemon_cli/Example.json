@@ -1,6 +1,38 @@
 {
   "Version": "0.0.0",
   "CHECKSUM": 0000,
-"Configuration": ["#include "quickdigest5/quickdigest5.h"
-"],]
+  "Configuration": [
+    {
+      "command": "w 0x71240028 0 0 0x81000005",
+      "description": "(Port3) VLAN aware"
+    }, 
+    {
+      "command": "w 0x71887400 0 0 0x1",
+      "description": "(Port1) VID=1"
+    },
+    {
+      "command": "w 0x71887500 0 0 0x2",
+      "description": "(Port2) VID=2"
+    },
+    {
+      "command": "w 0x71887600 0 0 0x14",
+      "description": "(Port3) VID=20"
+    },
+    {
+      "command": "w 0x71030304 0 0 0x100",
+      "description": "Tag all frames, except when VID=0"
+    },
+    {
+      "command": "w 0x71887404 0 0 0x14",
+      "description": "(Dev5, Port 1), nur untagged"
+    },
+    {
+      "command": "w 0x71887504 0 0 0x14",
+      "description": "(Dev6, Port 2), nur untagged"
+    },
+    {
+      "command": "w 0x71887604 0 0 0x60",
+      "description": "(Dev7, Port 3), nur C-tagged"
+    }
+  ]
 }
