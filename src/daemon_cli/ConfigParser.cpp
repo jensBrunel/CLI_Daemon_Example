@@ -7,6 +7,8 @@
 
 #include "rapidjson/document.h"
 #include "rapidjson/istreamwrapper.h"
+#include "quickdigest5/quickdigest5.h"
+
 
 namespace {
 std::string JsonValueToString(const rapidjson::Value &value) {
@@ -98,6 +100,7 @@ void ConfigParser::Load() {
     std::string strJson((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
     rapidjson::Document document;
     document.Parse(strJson.c_str());
+    auto hash = QuickDigest5::stringToHash(strJson); // Compute the checksum of the JSON string
     if (!document.IsObject()) {
         return;
     }
