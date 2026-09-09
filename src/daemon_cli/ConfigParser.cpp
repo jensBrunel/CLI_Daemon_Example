@@ -4,6 +4,7 @@
 #include <cctype>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "rapidjson/document.h"
 #include "rapidjson/istreamwrapper.h"
@@ -104,6 +105,13 @@ void ConfigParser::Load() {
     std::string strJson((std::istreambuf_iterator<char>(m_stream)), std::istreambuf_iterator<char>());
     rapidjson::Document document;
     document.Parse(strJson.c_str());
+    rapidjson::Value::ConstMemberIterator configIter = document.FindMember("Configuration");
+    const rapidjson::Value& configParameters = document["Configuration"];
+    for (auto& configParameter : configParameters.GetArray()) {
+        auto& command = configParameter["command"];
+        std::cout << "Command: " << command.GetString() << std::endl;
+    }
+
     auto hash = QuickDigest5::toHash(strJson); // Compute the checksum of the JSON string
     if (!document.IsObject()) {
         return;

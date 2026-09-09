@@ -20,8 +20,9 @@ int CommandParser::ParseArgs(int iArgc, char **ppszArgv) {
         } else if (strArg == "--inifile" && iIndex + 1 < iArgc) {
             m_strIniPath = ppszArgv[++iIndex];
         } else if (strArg == "--configfile" && iIndex + 1 < iArgc) {
-            m_configJson = ppszArgv[++iIndex];
-            std::cout<< "Config file path: " << m_configJson << std::endl;
+            const std::string switchConfigJson = ppszArgv[++iIndex];
+            std::cout<< "Switch config file path: " << switchConfigJson << std::endl;
+            m_configParser.Open(switchConfigJson);
         } else if (strArg == "-h" || strArg == "--help") {
             PrintUsage(ppszArgv[0]);
             return 0;
