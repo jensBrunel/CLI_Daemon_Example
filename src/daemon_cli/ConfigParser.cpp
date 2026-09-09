@@ -92,12 +92,16 @@ void ConfigParser::ParseValue(const rapidjson::Value &value, const std::string &
 }
 
 void ConfigParser::Load() {
-    std::ifstream stream(m_strPath);
-    if (!stream.is_open()) {
+    if (m_stream.is_open()) {
+        m_stream.close();
+    }
+    m_stream.clear();
+    m_stream.open(m_strPath);
+    if (!m_stream.is_open()) {
         return;
     }
 
-    std::string strJson((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+    std::string strJson((std::istreambuf_iterator<char>(m_stream)), std::istreambuf_iterator<char>());
     rapidjson::Document document;
     document.Parse(strJson.c_str());
     auto hash = QuickDigest5::toHash(strJson); // Compute the checksum of the JSON string

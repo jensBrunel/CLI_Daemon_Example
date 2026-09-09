@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "rapidjson/document.h"
+#include <fstream>
 
 class ConfigParser {
 public:
@@ -61,6 +62,7 @@ private:
 
     std::unordered_map<std::string, std::string> m_mapValues;
     std::string m_strPath;
+    std::ifstream m_stream;
 };
 
 #endif // CONFIGPARSER_H
