@@ -88,3 +88,4 @@ bin/sortkeys
 bin/tutorial
 src/daemon_cli/daemon_cli
 src/daemon_cli/daemon_cli
+src/daemon_cli/daemon_cli

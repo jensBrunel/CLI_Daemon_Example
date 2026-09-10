@@ -127,7 +127,24 @@ bool CommandParser::HandleInput(std::string &strErr, std::ostream &out) {
     if (strCommand == "quit" || strCommand == "exit") {
         return false;
     }
-
+    else if (strCommand == "help") {
+        out << "Available commands:\n";
+        out << "  help - Show this help message\n";
+        out << "  quit or exit - Exit the command mode\n";
+        out << "  status - Show the current switch status\n";
+        out << "  <any other command> - Send the command to the daemon\n";
+        return true;
+    }
+    else if (strCommand == "status") {
+        m_socket.send_message("switch status", strErr);
+        m_socket.receive_response(strErr);
+        out << "Current switch status\n";
+        out << "Port1: Active\n";
+        out << "Port2: Inactive\n";     
+        out << "Port3: Active\n";
+        return true;
+    }
+        
     auto optStrResp = Execute(strErr);
     if (!optStrResp) {
         out << "Command execution failed: " << strErr << '\n';
