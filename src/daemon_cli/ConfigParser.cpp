@@ -132,9 +132,7 @@ void ConfigParser::Load() {
         for (const auto& configParameter : configIter->value.GetArray()) {
             if (configParameter.IsObject()) {
                 const auto cmdIt = configParameter.FindMember("command");
-                if (cmdIt != configParameter.MemberEnd() && cmdIt->value.IsString()) {
-                    std::cout << "Command: " << cmdIt->value.GetString() << std::endl;
-                }
+                std::cout << "Command: " << cmdIt->value.GetString() << std::endl;
             }
         }
     }
