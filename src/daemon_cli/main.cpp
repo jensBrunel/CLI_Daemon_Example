@@ -23,8 +23,13 @@
  */
 int main(int iArgc, char **ppszArgv) {
     CommandParser commandParser(iArgc, ppszArgv);
-    if (!commandParser.IsValid()) {
-        return commandParser.ExitCode();
+    const int ec = commandParser.ExitCode();
+    if (ec == 0) {
+        return 0; // help printed
+    }
+    if (ec == 1) {
+        std::cout << "Invalid command-line arguments." << std::endl;
+        return 1;
     }
 
     std::string strErr;

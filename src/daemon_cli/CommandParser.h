@@ -60,11 +60,6 @@ public:
      */
     explicit CommandParser(std::string strSocketPath);
 
-    /**
-     * @brief Query whether the parser was initialized successfully.
-     * @return true when the arguments are valid, false for help or invalid usage.
-     */
-    bool IsValid() const;
 
     /**
      * @brief Get the exit code for the current argument parse state.
@@ -125,7 +120,6 @@ private:
     std::string m_configJson;
     ConfigParser m_configParser;
     DaemonSocket m_socket;
-    bool m_bValid;
     int m_iExitCode;
 };
 

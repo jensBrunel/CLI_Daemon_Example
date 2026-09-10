@@ -1,6 +1,6 @@
 {
   "Version": "0.0.0",
-  "CHECKSUM": 0000,
+  "CHECKSUM": "0000",
   "Configuration": [
     {
       "command": "w 0x71240028 0 0 0x81000005",

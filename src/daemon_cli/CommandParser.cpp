@@ -50,10 +50,9 @@ std::string CommandParser::ResolveSocketPath() {
 }
 
 CommandParser::CommandParser(int iArgc, char **ppszArgv)
-    : m_strInput(), m_strSocketPath(), m_socket(""), m_bValid(true), m_iExitCode(-1) {
+    : m_strInput(), m_strSocketPath(), m_socket(""), m_iExitCode(-1) {
     m_iExitCode = ParseArgs(iArgc, ppszArgv);
     if (m_iExitCode == 0 || m_iExitCode == 1) {
-        m_bValid = false;
         return;
     }
     // If a JSON config file path was provided, try to open it and allow it
@@ -73,11 +72,9 @@ CommandParser::CommandParser(int iArgc, char **ppszArgv)
 }
 
 CommandParser::CommandParser(std::string strSocketPath)
-    : m_strInput(), m_strSocketPath(std::move(strSocketPath)), m_socket(m_strSocketPath), m_bValid(true), m_iExitCode(-1) {}
+    : m_strInput(), m_strSocketPath(std::move(strSocketPath)), m_socket(m_strSocketPath), m_iExitCode(-1) {}
 
-bool CommandParser::IsValid() const {
-    return m_bValid;
-}
+// `IsValid()` removed; use `ExitCode()` to determine parsing result instead.
 
 int CommandParser::ExitCode() const {
     return m_iExitCode;

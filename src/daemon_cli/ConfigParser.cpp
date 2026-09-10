@@ -68,6 +68,7 @@ ConfigParser::ConfigParser(const std::string &strPath) : m_strPath(strPath) {
 bool ConfigParser::Open(const std::string &strPath) {
     m_strPath = strPath;
     m_mapValues.clear();
+    std::cout << "Opening config file: " << m_strPath << std::endl;
     Load();
     return !m_strPath.empty();
 }
@@ -93,29 +94,52 @@ void ConfigParser::ParseValue(const rapidjson::Value &value, const std::string &
 }
 
 void ConfigParser::Load() {
+    std::stringstream inputBuffer;
+    std::string inputLine;
+    std::cout << "Loading config file: " << m_strPath << std::endl;
     if (m_stream.is_open()) {
         m_stream.close();
+        std::cout << "Closed previous config file stream." << std::endl;
     }
     m_stream.clear();
     m_stream.open(m_strPath);
     if (!m_stream.is_open()) {
+        std::cerr << "Failed to open config file: " << m_strPath << std::endl;
         return;
     }
 
-    std::string strJson((std::istreambuf_iterator<char>(m_stream)), std::istreambuf_iterator<char>());
+    while (std::getline(m_stream, inputLine))
+    {
+        inputBuffer << inputLine << "\n";
+    }
+    std::cout << "Read config file content:\n" << inputBuffer.str() << std::endl;
     rapidjson::Document document;
-    document.Parse(strJson.c_str());
-    rapidjson::Value::ConstMemberIterator configIter = document.FindMember("Configuration");
-    const rapidjson::Value& configParameters = document["Configuration"];
-    for (auto& configParameter : configParameters.GetArray()) {
-        auto& command = configParameter["command"];
-        std::cout << "Command: " << command.GetString() << std::endl;
-    }
-
-    auto hash = QuickDigest5::toHash(strJson); // Compute the checksum of the JSON string
-    if (!document.IsObject()) {
+    document.Parse(inputBuffer.str().c_str());
+    if (document.HasParseError()) {
+        std::cerr << "ConfigParser: JSON parse error: "
+                  << rapidjson::GetParseErrorFunc(document.GetParseError())
+                  << " at offset " << document.GetErrorOffset() << std::endl;
         return;
     }
+
+    if (!document.IsObject()) {
+        std::cerr << "ConfigParser: JSON root is not an object in '" << m_strPath << "'" << std::endl;
+        return;
+    }
+
+    rapidjson::Value::ConstMemberIterator configIter = document.FindMember("Configuration");
+    if (configIter != document.MemberEnd() && configIter->value.IsArray()) {
+        for (const auto& configParameter : configIter->value.GetArray()) {
+            if (configParameter.IsObject()) {
+                const auto cmdIt = configParameter.FindMember("command");
+                if (cmdIt != configParameter.MemberEnd() && cmdIt->value.IsString()) {
+                    std::cout << "Command: " << cmdIt->value.GetString() << std::endl;
+                }
+            }
+        }
+    }
+
+    auto hash = QuickDigest5::toHash(inputBuffer.str()); // Compute the checksum of the JSON string
 
     m_mapValues.clear();
     ParseValue(document, "");
