@@ -116,6 +116,16 @@ std::optional<std::string> CommandParser::Execute(std::string &strErr) {
     return m_socket.receive_response(strErr);
 }
 
+bool CommandParser::IsLocalOnlyCommand() const {
+    const std::vector<std::string> vecTokens = Parse();
+    if (vecTokens.empty()) {
+        return false;
+    }
+
+    const std::string strCommand = vecTokens.front();
+    return strCommand == "quit" || strCommand == "exit" || strCommand == "help";
+}
+
 bool CommandParser::HandleInput(std::string &strErr, std::ostream &out) {
     const std::vector<std::string> vecTokens = Parse();
 
@@ -124,6 +134,7 @@ bool CommandParser::HandleInput(std::string &strErr, std::ostream &out) {
     }
 
     const std::string strCommand = vecTokens.front();
+    out << __FUNCTION__ << " Command: " << strCommand << std::endl;
     if (strCommand == "quit" || strCommand == "exit") {
         return false;
     }
@@ -136,12 +147,17 @@ bool CommandParser::HandleInput(std::string &strErr, std::ostream &out) {
         return true;
     }
     else if (strCommand == "status") {
-        m_socket.send_message("switch status", strErr);
-        m_socket.receive_response(strErr);
-        out << "Current switch status\n";
-        out << "Port1: Active\n";
-        out << "Port2: Inactive\n";     
-        out << "Port3: Active\n";
+        out << "Sending status request" << std::endl;
+        if(m_socket.send_message("switch status", strErr)){
+           out << "Waiting for response..." << std::endl;
+           auto answer = m_socket.receive_response(strErr);
+           if(answer)
+           {
+              out << answer.value() << std::endl;
+           }
+        }
+        
+        
         return true;
     }
         

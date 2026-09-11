@@ -33,10 +33,6 @@ int main(int iArgc, char **ppszArgv) {
     }
 
     std::string strErr;
-    if (!commandParser.Connect(strErr)) {
-        std::cerr << "Failed to connect to " << commandParser.SocketPath() << ": " << strErr << "\n";
-        return 2;
-    }
 
     // interactive mode
     std::string strLine;
@@ -45,6 +41,18 @@ int main(int iArgc, char **ppszArgv) {
         if (!std::getline(std::cin, strLine)) break;
 
         commandParser.SetInput(strLine);
+        if (commandParser.IsLocalOnlyCommand()) {
+            if (!commandParser.HandleInput(strErr, std::cout)) {
+                break;
+            }
+            continue;
+        }
+
+        if (!commandParser.Connect(strErr)) {
+            std::cerr << "Failed to connect to " << commandParser.SocketPath() << ": " << strErr << "\n";
+            return 2;
+        }
+
         if (!commandParser.HandleInput(strErr, std::cout)) {
             break;
         }
