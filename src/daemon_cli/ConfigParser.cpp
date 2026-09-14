@@ -7,6 +7,8 @@
 #include <iostream>
 
 #include "rapidjson/document.h"
+#include "rapidjson/stringbuffer.h"
+#include "rapidjson/writer.h"
 #include "rapidjson/istreamwrapper.h"
 #include "quickdigest5.h"
 
@@ -136,8 +138,26 @@ void ConfigParser::Load() {
             }
         }
     }
+    const rapidjson::Value& configArray = document["Configuration"];
+    rapidjson::StringBuffer configBuffer;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(configBuffer);
+    configArray.Accept(writer);
+    std::string configAsString = configBuffer.GetString();
 
-    auto hash = QuickDigest5::toHash(inputBuffer.str()); // Compute the checksum of the JSON string
+    auto hash = QuickDigest5::toHash(configAsString); // Compute the checksum of the JSON config array string
+    std::cout << "Checksum of Configuration array: " << hash << std::endl;
+    const rapidjson::Value& checksumValue = document["CHECKSUM"];
+    if (checksumValue.IsString()) {
+        std::string checksumInFile = checksumValue.GetString();
+        std::cout << "Checksum in file: " << checksumInFile << std::endl;
+        if (hash != checksumInFile) {
+            std::cerr << "Checksum mismatch! The Configuration array may have been tampered with." << std::endl;
+        } else {
+            std::cout << "Checksum matches. The Configuration array is valid." << std::endl;
+        }
+    } else {
+        std::cerr << "CHECKSUM field is missing or not a string in the config file." << std::endl;
+    }
 
     m_mapValues.clear();
     ParseValue(document, "");
