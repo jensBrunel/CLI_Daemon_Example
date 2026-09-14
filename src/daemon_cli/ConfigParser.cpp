@@ -114,7 +114,7 @@ void ConfigParser::Load() {
     {
         inputBuffer << inputLine << "\n";
     }
-    std::cout << "Read config file content:\n" << inputBuffer.str() << std::endl;
+    //std::cout << "Read config file content:\n" << inputBuffer.str() << std::endl;
     rapidjson::Document document;
     document.Parse(inputBuffer.str().c_str());
     if (document.HasParseError()) {
@@ -133,8 +133,8 @@ void ConfigParser::Load() {
     if (configIter != document.MemberEnd() && configIter->value.IsArray()) {
         for (const auto& configParameter : configIter->value.GetArray()) {
             if (configParameter.IsObject()) {
-                const auto cmdIt = configParameter.FindMember("command");
-                std::cout << "Command: " << cmdIt->value.GetString() << std::endl;
+                //const auto cmdIt = configParameter.FindMember("command");
+                //std::cout << "Command: " << cmdIt->value.GetString() << std::endl;
             }
         }
     }
@@ -145,15 +145,15 @@ void ConfigParser::Load() {
     std::string configAsString = configBuffer.GetString();
 
     auto hash = QuickDigest5::toHash(configAsString); // Compute the checksum of the JSON config array string
-    std::cout << "Checksum of Configuration array: " << hash << std::endl;
+    //std::cout << "Checksum of Configuration array: " << hash << std::endl;
     const rapidjson::Value& checksumValue = document["CHECKSUM"];
     if (checksumValue.IsString()) {
         std::string checksumInFile = checksumValue.GetString();
-        std::cout << "Checksum in file: " << checksumInFile << std::endl;
+        //std::cout << "Checksum in file: " << checksumInFile << std::endl;
         if (hash != checksumInFile) {
             std::cerr << "Checksum mismatch! The Configuration array may have been tampered with." << std::endl;
         } else {
-            std::cout << "Checksum matches. The Configuration array is valid." << std::endl;
+            //std::cout << "Checksum matches. The Configuration array is valid." << std::endl;
         }
     } else {
         std::cerr << "CHECKSUM field is missing or not a string in the config file." << std::endl;

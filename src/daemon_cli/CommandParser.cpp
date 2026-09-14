@@ -55,18 +55,7 @@ CommandParser::CommandParser(int iArgc, char **ppszArgv)
     if (m_iExitCode == 0 || m_iExitCode == 1) {
         return;
     }
-    // If a JSON config file path was provided, try to open it and allow it
-    // to override the socket path via the key "SOCKET_PATH".
-    if (!m_configJson.empty()) {
-        if (m_configParser.Open(m_configJson)) {
-            if (m_configParser.HasKey("SOCKET_PATH")) {
-                m_strSocketPath = m_configParser.GetValue("SOCKET_PATH");
-            }
-        } else {
-            std::cerr << "Warning: failed to open config file: " << m_configJson << std::endl;
-        }
-    }
-
+    
     m_strSocketPath = ResolveSocketPath();
     m_socket = DaemonSocket(m_strSocketPath);
 }
@@ -134,16 +123,11 @@ bool CommandParser::HandleInput(std::string &strErr, std::ostream &out) {
     }
 
     const std::string strCommand = vecTokens.front();
-    out << __FUNCTION__ << " Command: " << strCommand << std::endl;
     if (strCommand == "quit" || strCommand == "exit") {
         return false;
     }
     else if (strCommand == "help") {
-        out << "Available commands:\n";
-        out << "  help - Show this help message\n";
-        out << "  quit or exit - Exit the command mode\n";
-        out << "  status - Show the current switch status\n";
-        out << "  <any other command> - Send the command to the daemon\n";
+        ShowHelpText(out);
         return true;
     }
     else if (strCommand == "status") {
@@ -160,6 +144,27 @@ bool CommandParser::HandleInput(std::string &strErr, std::ostream &out) {
         
         return true;
     }
+    else if (strCommand == "set") {
+        out << "Sending set request" << std::endl;
+        if( vecTokens.size() > 1) {
+            auto tempPath = vecTokens[1];  
+            out << "Path provided: " << tempPath << std::endl; 
+        }       
+        
+        return true;
+    }
+    else if (strCommand == "copy") {
+        out << "Sending copy request" << std::endl;
+        if( vecTokens.size() > 1) {
+            auto tempPath = vecTokens[1];  
+            out << "Path provided: " << tempPath << std::endl; 
+        }       
+        return true;
+    }
+    else {
+        ShowHelpText(out);
+        return true;
+    }
         
     auto optStrResp = Execute(strErr);
     if (!optStrResp) {
@@ -169,4 +174,14 @@ bool CommandParser::HandleInput(std::string &strErr, std::ostream &out) {
 
     out << *optStrResp << std::endl;
     return true;
+}
+
+void CommandParser::ShowHelpText(std::ostream &out)
+{
+    out << "Available commands:\n";
+    out << "  help - Show this help message\n";
+    out << "  quit or exit - Exit the command mode\n";
+    out << "  status - Show the current switch status\n";
+    out << "  set <PATH> - Sets the configuration permanently in the daemon, <PATH> only needed if not given as parameter.\n";
+    out << "  copy <PATH> - Sets the configuration in the switch, <PATH> only needed if not given as parameter.\n";
 }

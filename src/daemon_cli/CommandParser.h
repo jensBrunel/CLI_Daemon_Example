@@ -113,6 +113,8 @@ public:
      */
     bool HandleInput(std::string &strErr, std::ostream &out);
 
+    void ShowHelpText(std::ostream &out);
+
     /**
      * @brief Returns true for commands handled directly by the client without
      *        requiring a daemon socket connection.

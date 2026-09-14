@@ -34,13 +34,17 @@ int main(int iArgc, char **ppszArgv) {
 
     std::string strErr;
 
+    commandParser.ShowHelpText(std::cout);
+
     // interactive mode
     std::string strLine;
     while (true) {
         std::cout << "> ";
         if (!std::getline(std::cin, strLine)) break;
+        
 
         commandParser.SetInput(strLine);
+
         if (commandParser.IsLocalOnlyCommand()) {
             if (!commandParser.HandleInput(strErr, std::cout)) {
                 break;
