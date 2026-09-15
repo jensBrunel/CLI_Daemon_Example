@@ -79,6 +79,10 @@ bool ConfigParser::IsOpen() const {
     return !m_strPath.empty();
 }
 
+const std::string &ConfigParser::GetPath() const {
+    return m_strPath;
+}
+
 void ConfigParser::ParseValue(const rapidjson::Value &value, const std::string &strPrefix) {
     if (value.IsObject()) {
         for (auto it = value.MemberBegin(); it != value.MemberEnd(); ++it) {

@@ -132,7 +132,7 @@ bool CommandParser::HandleInput(std::string &strErr, std::ostream &out) {
     }
     else if (strCommand == "status") {
         out << "Sending status request" << std::endl;
-        if(m_socket.send_message("switch status", strErr)){
+        if(m_socket.send_message("switch_status", strErr)){
            out << "Waiting for response..." << std::endl;
            auto answer = m_socket.receive_response(strErr);
            if(answer)
@@ -146,19 +146,46 @@ bool CommandParser::HandleInput(std::string &strErr, std::ostream &out) {
     }
     else if (strCommand == "set") {
         out << "Sending set request" << std::endl;
+        std::string tempPath;
         if( vecTokens.size() > 1) {
-            auto tempPath = vecTokens[1];  
+            tempPath = vecTokens[1];  
             out << "Path provided: " << tempPath << std::endl; 
         }       
-        
+        else {
+            tempPath = m_configParser.GetPath();
+            out << "Path from config file: " << tempPath << std::endl;
+        }
+        std::string msgString = "set " + tempPath;
+        if(m_socket.send_message(msgString, strErr)){
+           out << "Waiting for response..." << std::endl;
+           auto answer = m_socket.receive_response(strErr);
+           if(answer)
+           {
+              out << answer.value() << std::endl;
+           }
+        }
         return true;
     }
     else if (strCommand == "copy") {
         out << "Sending copy request" << std::endl;
+        std::string tempPath;
         if( vecTokens.size() > 1) {
-            auto tempPath = vecTokens[1];  
+            tempPath = vecTokens[1];  
             out << "Path provided: " << tempPath << std::endl; 
-        }       
+        } 
+        else {
+            tempPath = m_configParser.GetPath();
+            out << "Path from config file: " << tempPath << std::endl;
+        } 
+        std::string msgString = "copy " + tempPath;
+        if(m_socket.send_message(msgString, strErr)){
+           out << "Waiting for response..." << std::endl;
+           auto answer = m_socket.receive_response(strErr);
+           if(answer)
+           {
+              out << answer.value() << std::endl;
+           }
+        }     
         return true;
     }
     else {

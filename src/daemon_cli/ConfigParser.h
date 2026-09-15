@@ -54,6 +54,12 @@ public:
      */
     bool IsOpen() const;
 
+    /**
+     * @brief Get the path of the currently loaded config file.
+     * @return Path to the config file.
+     */
+    const std::string &GetPath() const;
+
 private:
     void Load();
     void ParseValue(const rapidjson::Value &value, const std::string &strPrefix);
