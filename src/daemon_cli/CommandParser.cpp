@@ -155,7 +155,8 @@ bool CommandParser::HandleInput(std::string &strErr, std::ostream &out) {
             tempPath = m_configParser.GetPath();
             out << "Path from config file: " << tempPath << std::endl;
         }
-        std::string msgString = "set " + tempPath;
+        std::string absPath(realpath(tempPath.c_str(), nullptr)); // Resolve the absolute path
+        std::string msgString = "set " + absPath;
         if(m_socket.send_message(msgString, strErr)){
            out << "Waiting for response..." << std::endl;
            auto answer = m_socket.receive_response(strErr);
@@ -177,7 +178,8 @@ bool CommandParser::HandleInput(std::string &strErr, std::ostream &out) {
             tempPath = m_configParser.GetPath();
             out << "Path from config file: " << tempPath << std::endl;
         } 
-        std::string msgString = "copy " + tempPath;
+        std::string absPath(realpath(tempPath.c_str(), nullptr)); // Resolve the absolute path
+        std::string msgString = "copy " + absPath;
         if(m_socket.send_message(msgString, strErr)){
            out << "Waiting for response..." << std::endl;
            auto answer = m_socket.receive_response(strErr);
