@@ -27,26 +27,7 @@ public:
      */
     bool Open(const std::string &strPath);
 
-    /**
-     * @brief Get a configuration value by key.
-     * @param strKey Key name to look up.
-     * @return Value associated with the key or an empty string if missing.
-     */
-    std::string GetValue(const std::string &strKey) const;
 
-    /**
-     * @brief Get a configuration value by key from an array of values.
-     * @param strKey Key name to look up.
-     * @return Value associated with the key or an empty string if missing.
-     */
-    std::string GetValue(const std::string &arrayKey, const std::string &strKey) const;
-
-    /**
-     * @brief Check whether a key exists in the loaded config.
-     * @param strKey Key name to look up.
-     * @return true if the key is present, false otherwise.
-     */
-    bool HasKey(const std::string &strKey) const;
 
     /**
      * @brief Check whether a config file was successfully opened.

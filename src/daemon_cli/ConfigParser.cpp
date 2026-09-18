@@ -167,22 +167,3 @@ void ConfigParser::Load() {
     ParseValue(document, "");
 }
 
-std::string ConfigParser::GetValue(const std::string &strKey) const {
-    const auto it = m_mapValues.find(Uppercase(strKey));
-    if (it == m_mapValues.end()) {
-        return "";
-    }
-    return it->second;
-}
-
-std::string ConfigParser::GetValue(const std::string &arrayKey, const std::string &strKey) const {
-    const auto it = m_mapValues.find(Uppercase(arrayKey + "." + strKey));
-    if (it == m_mapValues.end()) {
-        return "";
-    }
-    return it->second;
-}
-
-bool ConfigParser::HasKey(const std::string &strKey) const {
-    return m_mapValues.find(Uppercase(strKey)) != m_mapValues.end();
-}
