@@ -93,12 +93,6 @@ public:
     std::vector<std::string> Parse() const;
 
     /**
-     * @brief Get the raw input line as originally stored.
-     * @return The unmodified command string.
-     */
-    std::string Raw() const;
-
-    /**
      * @brief Send the current command to the daemon and read its response.
      * @param strErr Output buffer receiving any send/receive failure description.
      * @return Optional response string from the daemon, or std::nullopt on failure.

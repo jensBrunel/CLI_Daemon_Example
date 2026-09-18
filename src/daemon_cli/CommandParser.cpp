@@ -93,10 +93,6 @@ std::vector<std::string> CommandParser::Parse() const {
     return vecTokens;
 }
 
-std::string CommandParser::Raw() const {
-    return m_strInput;
-}
-
 std::optional<std::string> CommandParser::Execute(std::string &strErr) {
     if (!m_socket.send_message(m_strInput, strErr)) {
         return std::nullopt;

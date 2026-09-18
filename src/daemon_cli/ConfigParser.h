@@ -27,14 +27,6 @@ public:
      */
     bool Open(const std::string &strPath);
 
-
-
-    /**
-     * @brief Check whether a config file was successfully opened.
-     * @return true if loaded data is available, false otherwise.
-     */
-    bool IsOpen() const;
-
     /**
      * @brief Get the path of the currently loaded config file.
      * @return Path to the config file.

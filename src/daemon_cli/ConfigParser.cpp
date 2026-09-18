@@ -75,10 +75,6 @@ bool ConfigParser::Open(const std::string &strPath) {
     return !m_strPath.empty();
 }
 
-bool ConfigParser::IsOpen() const {
-    return !m_strPath.empty();
-}
-
 const std::string &ConfigParser::GetPath() const {
     return m_strPath;
 }
